@@ -1,0 +1,26 @@
+{
+  "name": "7cards",
+  "version": "1.0.0",
+  "description": "play 7 cards",
+  "main": "server.js",
+  "scripts": {
+    "test": "none"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sktguha/7cards.git"
+  },
+  "keywords": [
+    "card",
+    "game"
+  ],
+  "author": "saikat guha",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sktguha/7cards/issues"
+  },
+  "homepage": "https://github.com/sktguha/7cards#readme",
+  "devDependencies": {
+    "express": "^4.17.1"
+  }
+}

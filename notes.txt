@@ -1,0 +1,85 @@
+ 
+function setupName(){
+  check ls.name. if name present return promise
+  else take input. then make request api/is-match?name=
+  if request returns match. 
+  warn about login. 
+	if select yes. then set ls and 
+  make request to api/add-player and add to players array in server
+  else call setupname
+}
+
+
+have a set of players as players array and add to it
+const players = [];
+
+<button onclick="startNewGame()">restart game/ start new game. </button>
+
+function startNewGame(){
+ take no of cards per player(default as 7) as input. then call api/get-all-players, then select
+ which players in game from list will play as csv(enter 0 to select all)
+ then make call as api/start-new-game?cards=7&playerList=1,3,4
+}
+
+log()=>{
+  line = Date.now()+" : "+[...arguments].join(",")
+  logs.push(line);
+}
+
+"api/start-new-game", function(){
+ set deck = [initial-deck]
+ set currTurn = 0;
+ set currPlayers as shuffle from the req.playerList from players
+ set cards[...currPlayers]= [req.noOfCards] as drawn randomly from the deck
+ set turnHistory = []; { action:'place', cards: [], playerName: 'name'} or { action:'draw-two', cards:[], playerName:'name'} or { action:'draw-one', cards:[], playerName:'name'}
+  set topcard = "";
+}
+
+"api/play-turn", function(){
+  if(name !== currPlayers[currIndex]) log('play turn call ignored as not curr player', name, currPlayers[currIndex]);
+  if(place){
+    turnHistory.push(obj)
+    log(name, 'played turn ',JSON.stringify(obj.action));
+    
+    topcard = 
+  }
+}
+
+function init(){
+  setInterval(()=>{
+    "api/curr-top-card"?name=ls.name.then(settopcardimage)
+  }, 500)
+  setInterval(()=>{
+    "api/get-cards"?name=ls.name.then(if(null) then "no game playing. click button to start" else
+refresh list)
+  }, 500);
+  setInterval(()=>{
+    "api/check-if-turn"?name=ls.name.then(return name. 
+	if currname{
+       window.prompt('1.place card 2. pick one 3. pick two')
+       if(place === 'j') select 1. give your card 2. order to pick two
+   	 api/play-turn?actionType=1&cardNo=3&order=1&cardNoToGive=4 or no=2 or no=3
+	else 
+       highlight name
+    })
+  }, 500)
+setInterval(()=>{
+    "api/curr-players"?name=ls.name.then(set curr players list)
+  }, 500)
+setInterval(()=>{
+    "api/stack-history"?name=ls.name.then(set it in textfield)
+  }, 500)
+
+}
+
+<button onclick="undoLastTurn()">undo last turn</button>
+ 
+logs are refreshed blindly by setInterval of 1 sec. logs.push
+chats are refreshed blindly by setInterval of 1 sec. logs.push
+
+
+have array of players. cards[name] contains the cards of the player
+generate randomised array of players from players
+now fill cards[name] with no of cards
+  
+client does setinterval
