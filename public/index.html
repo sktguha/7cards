@@ -148,6 +148,7 @@
                     renderCards(cards);
                     renderCurrPlayers(currPlayers, currIndex);
                     if (currPlayerName === localStorage["name"]) {
+                        playTurnLock = true;
                         $('#curr-player-info').text('it is your turn now');
                         $('#play-turn').removeClass('disabled');
                         document.querySelectorAll('#play-turn button').forEach(elem => {
