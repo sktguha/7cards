@@ -75,17 +75,17 @@ incrementIndex(){
     topcard = cardToPlace;
     
     if(order){
-	incrementIndex();
-	const nextPlayer = currPlayers[currIndex];
+	const nextPlayer = currPlayers[currIndex+1];
       if(order===1){
          const cardToGive = cards[name][cardNoToGive];
+	   removeCardFromPlayerHand(name,cardToGive);
 	   addCardToPlayerHand(nextPlayer, cardToGive);
 	   log(nextPlayer,' gave ',cardToGive,' to ', name, ' by order');
 	}
 	if(order === 2){
          log(nextPlayer,' ordered to pull two cards by', name);	   
-	   pullCard(currPlayers[currIndex])
-	   pullCard(currPlayers[currIndex])
+	   pullCard(nextPlayer)
+	   pullCard(nextPlayer)
 	}
     } else if(pull one){
       pullCard(currPlayers[currIndex])

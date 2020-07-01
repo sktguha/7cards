@@ -69,6 +69,7 @@ function removeCardFromPlayerHand(name, card) {
     cards[name] = sortCards(cards[name]);
 }
 app.get("/api/start-new-game", (req, res) => {
+    addToPlayers(req.query.name);
     deck = shuffle(getInitialDeck());
     underDeck = [];
     currPlayers = shuffle(players);
@@ -90,15 +91,19 @@ app.get("/api/play-turn", (req, res) => {
 
 })
 
+function addToPlayers(name) {
+    if (players.indexOf(name) === -1) { players.push(name); console.log('added to players', name) }
+}
 app.get("/api/set-name", (req, res) => {
     const { name } = req.query;
-    if (players.indexOf(name) === -1) { players.push(name) }
+    addToPlayers(name);
     log('setname call of ', name);
     res.send({})
 })
 
 app.get("/api/refresh-data", (req, res) => {
     const { name } = req.query;
+    addToPlayers(name);
     const obj = {
         topCard, cards: cards[name] || [], currIndex, currPlayers
     }

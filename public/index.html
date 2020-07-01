@@ -9,11 +9,21 @@
         .current {
             border: 2px solid red;
         }
+
+        #top-card {
+            width: 60%;
+            height: 19em;
+            border-radius: 500px;
+            background-color: brown;
+            clear: both;
+            text-align: center;
+            padding-top: 43px;
+        }
     </style>
 </head>
 
 <body>
-    <div>
+    <div style=" margin-left: 120px;">
         <div>
             <button onclick="startNewGame()">start new game</button>
         </div>
@@ -90,6 +100,7 @@
             setupName();
             setInterval(() => {
                 api.get('api/refresh-data').then(({ topCard, cards, currIndex, currPlayers }) => {
+                    topCard = '2_of_hearts';
                     $('#top-card')[0].innerHTML = "";
                     topCard && $('#top-card')[0].appendChild(getImage(topCard));
                     renderCards(cards);
@@ -101,7 +112,7 @@
                             elem.disabled = false;
                         });
                     } else {
-                        $('#curr-player-info').text('it is turn of ', currPlayers[currIndex]);
+                        $('#curr-player-info').text('it is turn of ' + currPlayers[currIndex]);
                         $('#play-turn').addClass('disabled');
                         document.querySelectorAll('#play-turn button').forEach(elem => {
                             elem.disabled = true;
