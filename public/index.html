@@ -33,8 +33,16 @@
         <div id="top-card"></div><br><br>
         <div id="play-turn">
             <button>its your turn now. click pull one card or pull two card button or place a card</button><br>
-            <button onclick="api.get('api/play-turn', {actionType:2})">Pull one card</button>
-            <button onclick="api.get('api/play-turn', {actionType:3})">Pull two cards</button>
+            <button onclick="api.get('api/play-turn', {actionType:2}).then(() => {
+                playTurnLock = false;
+            }, (err) => {
+                playTurnLock = false;
+            })">Pull one card</button>
+            <button onclick="api.get('api/play-turn', {actionType:3}).then(() => {
+                playTurnLock = false;
+            }, (err) => {
+                playTurnLock = false;
+            })">Pull two cards</button>
             <br><span>Your cards(</span><span id="noc"></span>)
             <div id="cards-container" style="max-width: 100%;"></div>
         </div>
