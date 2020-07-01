@@ -1,0 +1,115 @@
+<head>
+    <style>
+        @keyframes blink {
+            50% {
+                border-color: #ff0000;
+            }
+        }
+
+        .current {
+            border: 2px solid red;
+        }
+    </style>
+</head>
+
+<body>
+    <div>
+        <div>
+            <button onclick="startNewGame()">start new game</button>
+        </div>
+        <span>Players List:</span>
+        <div id="curr-players" style="display:inline-block;"></div>
+        <div id="curr-player-info"></div>
+        <div id="top-card"></div><br><br>
+        <div id="play-turn">
+            <button>its your turn now. click pull one card or pull two card button or place a card</button><br>
+            <button onclick="api.get('api/play-turn', {actionType:2})">Pull one card</button>
+            <button onclick="api.get('api/play-turn', {actionType:3})">Pull two cards</button>
+            <br><span>Your cards:</span>
+            <div id="cards-container" style="max-width: 100%;"></div>
+        </div>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min.js">
+    </script>
+    <script>
+        const get = async (api, options = {}) => {
+            options.name = localStorage["name"];
+            return fetch(api + '?' + Object.entries(options).map(arr => arr[0] + '=' + arr[1]).join('&')).then(response => {
+                if (!response.ok) {
+                    console.error('error occurred', response);
+                    throw new Error(response.status);
+                }
+                return response.json();
+            });
+        };
+        const api = { get };
+        const cachedImages = {};
+        function startNewGame() {
+            if (!window.confirm('are you sure you want to start a new game')) return;
+            api.get('/api/start-new-game', { noOfCards: window.prompt('enter no of cards each player starts with', 7) });
+        }
+        function getImage(card) {
+            if (cachedImages[card]) return cachedImages[card];
+            const img = new Image();
+            img.src = 'https://bluff.herokuapp.com/images/' + card + '.png';
+            img.alt = card;
+            img.width = 176;
+            img.height = 256;
+            cachedImages[card] = img;
+            return cachedImages[card];
+        }
+        function renderCards(cards) {
+            const cc = $('#cards-container')[0];
+            cc.innerHTML = "";
+            cards.forEach((card, i) => {
+                let dv = document.createElement('div');
+                dv.style = "display: inline-block; text-align: center;  margin: 2px 2px;";
+                dv.appendChild(getImage(card));
+                let sp = document.createElement('span');
+                sp.innerText = "card no " + (i + 1);
+                sp.style = "display:block";
+                dv.appendChild(sp);
+                let bt = document.createElement('button');
+                bt.innerText = "place";
+                bt.style = "display: block; margin: 3px; margin-left: 64px;";
+                dv.appendChild(bt);
+                cc.appendChild(dv)
+            });
+        }
+        function renderCurrPlayers(players, currIndex) {
+            const cp = $('#curr-players')[0];
+            cp.innerHTML = players.map((player, i) => '<span style="margin-right:5px;" class=' + (i === currIndex ? 'current' : 'not-current') + '>' + player + '</span>').join('');
+        }
+        function setupName() {
+            if (localStorage['name']) return;
+            localStorage['name'] = window.prompt('enter your name');
+        }
+        function init() {
+            // renderCards(sortCards(_.sample(getInitialDeck(), 13)))
+            setupName();
+            setInterval(() => {
+                api.get('api/refresh-data').then(({ topCard, cards, currIndex, currPlayers }) => {
+                    $('#top-card')[0].innerHTML = "";
+                    topCard && $('#top-card')[0].appendChild(getImage(topCard));
+                    renderCards(cards);
+                    renderCurrPlayers(currPlayers, currIndex);
+                    if (currPlayers[currIndex] === localStorage["name"]) {
+                        $('#curr-player-info').text('it is your turn now');
+                        $('#play-turn').removeClass('disabled');
+                        document.querySelectorAll('#play-turn button').forEach(elem => {
+                            elem.disabled = false;
+                        });
+                    } else {
+                        $('#curr-player-info').text('it is turn of ', currPlayers[currIndex]);
+                        $('#play-turn').addClass('disabled');
+                        document.querySelectorAll('#play-turn button').forEach(elem => {
+                            elem.disabled = true;
+                        });
+                    }
+                })
+            }, 500);
+        }
+        init();
+    </script>
+</body>
