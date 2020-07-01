@@ -100,14 +100,17 @@ app.get("/api/set-name", (req, res) => {
     log('setname call of ', name);
     res.send({})
 })
-
+let lastLog = {}
 app.get("/api/refresh-data", (req, res) => {
     const { name } = req.query;
     addToPlayers(name);
     const obj = {
         topCard, cards: cards[name] || [], currIndex, currPlayers
     }
-    log('sent obj to client', name, obj);
+    if (Date.now() - (lastLog[name] || 0) > 5000) {
+        log('sent obj to client', name, obj);
+        lastLog[name] = Date.now();
+    }
     res.json(obj);
 });
 console.log('came here');
