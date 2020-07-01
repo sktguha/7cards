@@ -1,0 +1,22 @@
+<head>
+
+</head>
+
+<body>
+    <div>
+        <div id="top-card"></div>
+        <div id="play-turn">
+            <button onclick="api.get('api/play-turn', {actionType:2})">Pull one card</button>
+            <button onclick="api.get('api/play-turn', {actionType:3})">Pull two cards</button>
+            <div id="cards-container"></div>
+        </div>
+    </div>
+    <script>
+        const get = async (api, options = {}) => {
+            options.name = localStorage["name"];
+            const result = await fetch(api + '?' + Object.entries(options).map(arr => arr[0] + '=' + arr[1]).join('&'));
+            return result;
+        };
+        const api = { get };
+    </script>
+</body>
