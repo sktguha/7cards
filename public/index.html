@@ -79,7 +79,7 @@
             img.alt = card;
             img.width = 176;
             img.height = 256;
-            img.onclick = function () {
+            img.onclick = _.throttle(function () {
                 const cardNoToPlace = cards.indexOf(card);
                 const num = card.split('_')[0] * 1;
                 let order, cardNoToGive;
@@ -107,7 +107,7 @@
                 }, (err) => {
                     playTurnLock = false;
                 })
-            }
+            }, 2000);
             cachedImages[card] = img;
             return cachedImages[card];
         }
