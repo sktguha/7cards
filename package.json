@@ -22,5 +22,8 @@
   "homepage": "https://github.com/sktguha/7cards#readme",
   "devDependencies": {
     "express": "^4.17.1"
+  },
+  "dependencies": {
+    "express": "*"
   }
 }

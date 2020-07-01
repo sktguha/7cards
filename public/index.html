@@ -134,11 +134,8 @@
         }
         function init() {
             // renderCards(sortCards(_.sample(getInitialDeck(), 13)))
-            let lock = false;
             function poll() {
-                lock = true;
                 return api.get('api/refresh-data').then(({ topCard, cards: cardsData, currIndex, currPlayerName, currPlayers }) => {
-                    lock = false;
                     cards = cardsData;
                     $('#top-card')[0].innerHTML = "";
                     topCard && $('#top-card')[0].appendChild(getImage(topCard));
@@ -159,10 +156,14 @@
                     }
                 }).catch((err) => { console.log('err in polling', err); lock = false; });
             }
-            setInterval(() => {
-                if (lock) return;
-                poll();
-            }, 1000)
+            function doPoll() {
+                poll().then(() => {
+                    setTimeout(doPoll, 1000)
+                }, () => {
+                    setTimeout(doPoll, 1000)
+                })
+            }
+            doPoll();
         }
         setupName().then(init);
     </script>
