@@ -65,21 +65,34 @@
         function getImage(card) {
             if (cachedImages[card]) return cachedImages[card];
             const img = new Image();
-            img.src = 'https://bluff.herokuapp.com/images/' + card + '.png';
+            img.src = '/images/' + card + '.png';
             img.alt = card;
             img.width = 176;
             img.height = 256;
+            img.onclick = function () {
+                const cardNoToPlace = cards.indexOf(card);
+                api.get('/api/play-turn', {
+                    actionType: 1,
+                    cardNoToPlace
+                })
+            }
             cachedImages[card] = img;
             return cachedImages[card];
         }
         function renderCards(cards) {
             $('#noc').text(cards.length);
             const cc = $('#cards-container')[0];
+            if (cc.children.length === cards.length) {
+                console.log('skip render as count same');
+                return;
+            }
+            console.log('rendering again as count diff');
             cc.innerHTML = "";
             cards.forEach((card, i) => {
                 let dv = document.createElement('div');
                 dv.style = "display: inline-block; text-align: center;  margin: 2px 2px;";
-                dv.appendChild(getImage(card));
+                let img = getImage(card);
+                dv.appendChild(img);
                 let sp = document.createElement('span');
                 sp.innerText = "card no " + (i + 1);
                 sp.style = "display:block";
@@ -136,7 +149,7 @@
             setInterval(() => {
                 if (lock) return;
                 poll();
-            }, 2000)
+            }, 1000)
         }
         setupName().then(init);
     </script>

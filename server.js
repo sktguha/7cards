@@ -138,7 +138,7 @@ app.get("/api/refresh-data", (req, res) => {
     const { name } = req.query;
     addToPlayers(name);
     const obj = {
-        topCard, cards: cards[name] || [], currIndex, currPlayerName: currPlayers[currIndex], currPlayers: currPlayers.map(player => player + ' (' + cards[name].length + ' cards )')
+        topCard, cards: cards[name] || [], currIndex, currPlayerName: currPlayers[currIndex], currPlayers: currPlayers.map(player => player + ' (' + cards[player].length + ' cards )')
     }
     if (Date.now() - (lastLog[name] || 0) > 15000) {
         log('sent obj to client', name, obj);
