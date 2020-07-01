@@ -42,9 +42,9 @@ function log() {
     line = Date.now() + " : " + [...arguments].map(JSON.stringify).join(",")
     logs.push(line);
 }
-console.log = () => { }
+// console.log = () => { }
 
-log = () => { }
+// log = () => { }
 function takeCardFromDeck() {
     if (deck.length === 0) {
         deck = shuffle(underDeck);
@@ -114,6 +114,17 @@ app.get("/api/play-turn", (req, res) => {
         log(name, 'played turn ', actionType, ' card = ', cardToPlace);
         removeCardFromPlayerHand(name, cardToPlace);
         topCard = cardToPlace;
+        const nextPlayer = currPlayers[currIndex === currPlayers.length - 1 ? 0 : currIndex + 1];
+        if (order === 1) {
+            const cardToGive = cards[name][cardNoToGive];
+            removeCardFromPlayerHand(name, cardToGive);
+            addCardToPlayerHand(nextPlayer, cardToGive);
+            log(nextPlayer, ' gave ', cardToGive, ' to ', name, ' by order');
+        } else if (order === 2) {
+            log(nextPlayer, ' ordered to pull two cards by', name);
+            pullCard(nextPlayer);
+            pullCard(nextPlayer);
+        }
     } else if (actionType === 2) {
         pullCard(name);
         log(name, ' pulled card ');
@@ -122,7 +133,9 @@ app.get("/api/play-turn", (req, res) => {
         pullCard(name);
         log(name, ' pulled 2 cards ');
     }
-    incrementIndex();
+    if (!order) {
+        incrementIndex();
+    }
     log('turn transferred to next player', currPlayers[currIndex], currIndex, currPlayers);
     res.send({});
 })
