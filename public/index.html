@@ -82,8 +82,8 @@
             cp.innerHTML = players.map((player, i) => '<span style="margin-right:5px;" class=' + (i === currIndex ? 'current' : 'not-current') + '>' + player + '</span>').join('');
         }
         function setupName() {
-            if (localStorage['name']) return;
-            localStorage['name'] = window.prompt('enter your name');
+            localStorage['name'] = localStorage['name'] || window.prompt('enter your name');
+            return api.get('/api/set-name');
         }
         function init() {
             // renderCards(sortCards(_.sample(getInitialDeck(), 13)))

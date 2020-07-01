@@ -47,7 +47,7 @@ function takeCardFromDeck() {
         deck = shuffle(underDeck);
         underDeck = [];
     }
-    return deck.unshift();
+    return deck.shift();
 }
 function addCardToPlayerHand(name, card) {
     cards[name] = cards[name] || [];
@@ -75,12 +75,14 @@ app.get("/api/start-new-game", (req, res) => {
     currIndex = 0;
     cards = {};
     currPlayers.forEach(player => {
-        for (let i = 0; i < req.query.noOfCards || 7; i++) {
+        for (let i = 0; i < (req.query.noOfCards * 1 || 7); i++) {
             addCardToPlayerHand(player, takeCardFromDeck());
         }
     })
+    console.log({ cards });
     turnHistory = [];
     topCard = null;
+    log('started new game by', req.query.name);
     res.json({});
 });
 
@@ -88,10 +90,17 @@ app.get("/api/play-turn", (req, res) => {
 
 })
 
-app.get("api/refresh-data", (req, res) => {
+app.get("/api/set-name", (req, res) => {
+    const { name } = req.query;
+    if (players.indexOf(name) === -1) { players.push(name) }
+    log('setname call of ', name);
+    res.send({})
+})
+
+app.get("/api/refresh-data", (req, res) => {
     const { name } = req.query;
     const obj = {
-        topCard, cards: cards[name], currIndex, currPlayers
+        topCard, cards: cards[name] || [], currIndex, currPlayers
     }
     log('sent obj to client', name, obj);
     res.json(obj);
