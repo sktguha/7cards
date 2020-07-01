@@ -58,6 +58,7 @@
         const api = { get };
         const cachedImages = {};
         let cards = [];
+        let playTurnLock = false;
         function startNewGame() {
             if (!window.confirm('are you sure you want to start a new game')) return;
             api.get('/api/start-new-game', { noOfCards: window.prompt('enter no of cards each player starts with', 7) });
@@ -86,11 +87,16 @@
                         }
                     }
                 }
+                playTurnLock = true;
                 api.get('/api/play-turn', {
                     actionType: 1,
                     cardNoToPlace,
                     order,
                     cardNoToGive,
+                }).then(() => {
+                    playTurnLock = false;
+                }, (err) => {
+                    playTurnLock = false;
                 })
             }
             cachedImages[card] = img;
@@ -157,6 +163,9 @@
                 }).catch((err) => { console.log('err in polling', err); lock = false; });
             }
             function doPoll() {
+                if (playTurnLock) {
+                    setTimeout(doPoll, 1000);
+                }
                 poll().then(() => {
                     setTimeout(doPoll, Math.round(Math.random() * 3000 + 1))
                 }, () => {
