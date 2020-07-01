@@ -34,6 +34,7 @@ const logs = [];
 let turnHistory = [];
 let topCard = null;
 
+
 app.get("/", (req, res) => { res.redirect('/index.html') });
 app.use(express.static('public'))
 function log() {
@@ -41,7 +42,9 @@ function log() {
     line = Date.now() + " : " + [...arguments].map(JSON.stringify).join(",")
     logs.push(line);
 }
+console.log = () => { }
 
+log = () => { }
 function takeCardFromDeck() {
     if (deck.length === 0) {
         deck = shuffle(underDeck);

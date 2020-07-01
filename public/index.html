@@ -71,9 +71,26 @@
             img.height = 256;
             img.onclick = function () {
                 const cardNoToPlace = cards.indexOf(card);
+                const num = card.split('_')[0] * 1;
+                let order, cardNoToGive;
+                if (num === 11) {
+                    order = window.prompt('you have placed J, which is a power card\nenter your order for the next player\n1.give your one card to them\n2.order to take two cards', 2);
+                    order = order * 1;
+                    if (order === 1) {
+                        while (1) {
+                            cardNoToGive = window.prompt('which card you want to give') * 1;
+                            cardNoToGive--;
+                            if (cardNoToGive == cardNoToPlace) {
+                                alert('you can\'t give the J card to next player. choose another card');
+                            } else break;
+                        }
+                    }
+                }
                 api.get('/api/play-turn', {
                     actionType: 1,
-                    cardNoToPlace
+                    cardNoToPlace,
+                    order,
+                    cardNoToGive,
                 })
             }
             cachedImages[card] = img;
@@ -101,11 +118,7 @@
                 bt.innerText = "place";
                 bt.style = "display: block; margin: 3px; margin-left: 64px;";
                 bt.onclick = () => {
-                    const cardNoToPlace = i;
-                    api.get('/api/play-turn', {
-                        actionType: 1,
-                        cardNoToPlace
-                    })
+                    alert('click on the image to place that card');
                 }
                 dv.appendChild(bt);
                 cc.appendChild(dv)
