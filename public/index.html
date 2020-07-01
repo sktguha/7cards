@@ -35,7 +35,7 @@
             <button>its your turn now. click pull one card or pull two card button or place a card</button><br>
             <button onclick="api.get('api/play-turn', {actionType:2})">Pull one card</button>
             <button onclick="api.get('api/play-turn', {actionType:3})">Pull two cards</button>
-            <br><span>Your cards:</span>
+            <br><span>Your cards(</span><span id="noc"></span>)
             <div id="cards-container" style="max-width: 100%;"></div>
         </div>
     </div>
@@ -70,6 +70,7 @@
             return cachedImages[card];
         }
         function renderCards(cards) {
+            $('#noc').text(cards.length);
             const cc = $('#cards-container')[0];
             cc.innerHTML = "";
             cards.forEach((card, i) => {
@@ -99,13 +100,13 @@
             // renderCards(sortCards(_.sample(getInitialDeck(), 13)))
             setupName();
             setInterval(() => {
-                api.get('api/refresh-data').then(({ topCard, cards, currIndex, currPlayers }) => {
+                api.get('api/refresh-data').then(({ topCard, cards, currIndex, currPlayerName, currPlayers }) => {
                     topCard = '2_of_hearts';
                     $('#top-card')[0].innerHTML = "";
                     topCard && $('#top-card')[0].appendChild(getImage(topCard));
                     renderCards(cards);
                     renderCurrPlayers(currPlayers, currIndex);
-                    if (currPlayers[currIndex] === localStorage["name"]) {
+                    if (currPlayerName === localStorage["name"]) {
                         $('#curr-player-info').text('it is your turn now');
                         $('#play-turn').removeClass('disabled');
                         document.querySelectorAll('#play-turn button').forEach(elem => {

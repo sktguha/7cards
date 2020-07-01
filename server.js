@@ -87,8 +87,40 @@ app.get("/api/start-new-game", (req, res) => {
     res.json({});
 });
 
+function pullCard(name) {
+    card = takeCardFromDeck();
+    addCardToPlayerHand(name, card);
+}
+function incrementIndex() {
+    currIndex = currIndex === currPlayers.length - 1 ? 0 : currIndex + 1;
+}
 app.get("/api/play-turn", (req, res) => {
-
+    let { name, actionType, cardNoToPlace, order, cardNoToGive } = req.query;
+    actionType = actionType * 1;
+    cardNoToGive = cardNoToGive * 1;
+    order = order * 1;
+    cardNoToPlace = cardNoToPlace * 1;
+    if (name !== currPlayers[currIndex]) {
+        log('play by ', name, ' ignored as not curr player', currPlayers[currIndex], req.query);
+        return;
+    }
+    actionType = actionType * 1;
+    if (actionType === 1) {
+        underDeck.push(topCard);
+        const cardToPlace = cards[name][cardNoToPlace];
+        log(name, 'played turn ', actionType, ' card = ', cardToPlace);
+        removeCardFromPlayerHand(name, cardToPlace);
+        topCard = cardToPlace;
+    } else if (actionType === 2) {
+        pullCard(name);
+        log(name, ' pulled card ');
+    } else if (actionType === 3) {
+        pullCard(name);
+        pullCard(name);
+        log(name, ' pulled 2 cards ');
+    }
+    incrementIndex();
+    log('turn transferrd to next player', currPlayers[currIndex], currIndex, currPlayers);
 })
 
 function addToPlayers(name) {
@@ -105,7 +137,7 @@ app.get("/api/refresh-data", (req, res) => {
     const { name } = req.query;
     addToPlayers(name);
     const obj = {
-        topCard, cards: cards[name] || [], currIndex, currPlayers
+        topCard, cards: cards[name] || [], currIndex, currPlayerName: currPlayers[currIndex], currPlayers: currPlayers.map(player => player + ' (' + cards[name].length + ' cards )')
     }
     if (Date.now() - (lastLog[name] || 0) > 5000) {
         log('sent obj to client', name, obj);
