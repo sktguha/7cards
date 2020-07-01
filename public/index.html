@@ -47,6 +47,7 @@
             <div id="cards-container" style="max-width: 100%;"></div>
         </div>
     </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.slim.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min.js">
     </script>
@@ -147,43 +148,35 @@
             return api.get('/api/set-name');
         }
         function init() {
-            // renderCards(sortCards(_.sample(getInitialDeck(), 13)))
-            function poll() {
-                return api.get('api/refresh-data').then(({ topCard, cards: cardsData, currIndex, currPlayerName, currPlayers }) => {
-                    cards = cardsData;
-                    $('#top-card')[0].innerHTML = "";
-                    topCard && $('#top-card')[0].appendChild(getImage(topCard));
-                    renderCards(cards);
-                    renderCurrPlayers(currPlayers, currIndex);
-                    if (currPlayerName === localStorage["name"]) {
-                        playTurnLock = true;
-                        $('#curr-player-info').text('it is your turn now');
-                        $('#play-turn').removeClass('disabled');
-                        document.querySelectorAll('#play-turn button').forEach(elem => {
-                            elem.disabled = false;
-                        });
-                    } else {
-                        $('#curr-player-info').text('it is turn of ' + currPlayers[currIndex]);
-                        $('#play-turn').addClass('disabled');
-                        document.querySelectorAll('#play-turn button').forEach(elem => {
-                            elem.disabled = true;
-                        });
-                    }
-                }).catch((err) => { console.log('err in polling', err); lock = false; });
-            }
-            function doPoll() {
-                if (playTurnLock) {
-                    setTimeout(doPoll, 1000);
-                    return;
+            var socket = io();
+            const refreshData = (obj) => {
+                let { topCard, cards: cardsData, currIndex, currPlayerName, currPlayers } = obj;
+                console.log('refreshData . got ', arguments[0], arguments)
+                cards = cardsData[localStorage['name']] || [];
+                $('#top-card')[0].innerHTML = "";
+                topCard && $('#top-card')[0].appendChild(getImage(topCard));
+                renderCards(cards);
+                renderCurrPlayers(currPlayers, currIndex);
+                if (currPlayerName === localStorage["name"]) {
+                    playTurnLock = true;
+                    $('#curr-player-info').text('it is your turn now');
+                    $('#play-turn').removeClass('disabled');
+                    document.querySelectorAll('#play-turn button').forEach(elem => {
+                        elem.disabled = false;
+                    });
+                } else {
+                    $('#curr-player-info').text('it is turn of ' + currPlayers[currIndex]);
+                    $('#play-turn').addClass('disabled');
+                    document.querySelectorAll('#play-turn button').forEach(elem => {
+                        elem.disabled = true;
+                    });
                 }
-                poll().then(() => {
-                    setTimeout(doPoll, Math.round(Math.random() * 3000 + 1))
-                }, () => {
-                    setTimeout(doPoll, Math.round(Math.random() * 3000 + 1))
-                })
-            }
-            doPoll();
+            };
+            api.get('api/refresh-data');//.then(refreshData);
+            socket.on('message', refreshData);
+
         }
+
         setupName().then(init);
     </script>
 </body>

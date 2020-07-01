@@ -1,5 +1,7 @@
 const express = require("express");
 const app = express();
+var http = require("http").Server(app);
+var io = require("socket.io")(http);
 function sortCards(cards) {
     return cards.sort((a, b) => {
         let numa = a.split('_')[0], suita = a.split('_').pop();
@@ -73,6 +75,7 @@ function removeCardFromPlayerHand(name, card) {
 }
 app.get("/api/start-new-game", (req, res) => {
     addToPlayers(req.query.name);
+    const { name } = req.query;
     deck = shuffle(getInitialDeck());
     underDeck = [];
     currPlayers = shuffle(players);
@@ -87,6 +90,7 @@ app.get("/api/start-new-game", (req, res) => {
     turnHistory = [];
     topCard = null;
     log('started new game by', req.query.name);
+    emitRefreshData()
     res.json({});
 });
 
@@ -137,8 +141,17 @@ app.get("/api/play-turn", (req, res) => {
         incrementIndex();
     }
     log('turn transferred to next player', currPlayers[currIndex], currIndex, currPlayers);
+    emitRefreshData();
     res.send({});
 })
+
+function emitRefreshData() {
+    const obj = {
+        topCard, cards, currIndex, currPlayerName: currPlayers[currIndex], currPlayers: currPlayers.map(player => player + ' (' + cards[player].length + ' cards )')
+    }
+    console.log('emitting', obj);
+    io.emit('message', obj);
+}
 
 function addToPlayers(name) {
     if (players.indexOf(name) === -1) { players.push(name); console.log('added to players', name) }
@@ -153,14 +166,15 @@ let lastLog = {}
 app.get("/api/refresh-data", (req, res) => {
     const { name } = req.query;
     addToPlayers(name);
-    const obj = {
-        topCard, cards: cards[name] || [], currIndex, currPlayerName: currPlayers[currIndex], currPlayers: currPlayers.map(player => player + ' (' + cards[player].length + ' cards )')
-    }
-    if (Date.now() - (lastLog[name] || 0) > 15000) {
-        log('sent obj to client', name, obj);
-        lastLog[name] = Date.now();
-    }
-    res.json(obj);
+    emitRefreshData();
+    res.send({});
 });
 console.log('came here');
-app.listen(process.env.PORT || 3000, () => console.log("Server listening on port 3000!"));
+io.on('connection', () => {
+    console.log('a user is connected')
+})
+// setTimeout(() => { console.log('emitted'); io.emit('message', { data: 'data' }) }, 3000);
+var server = http.listen(process.env.PORT || 3000, () => {
+    console.log('server is running on port', server.address().port);
+});
+// app.listen( 3000, () => console.log("Server listening on port 3000!"));
