@@ -166,6 +166,7 @@
             function doPoll() {
                 if (playTurnLock) {
                     setTimeout(doPoll, 1000);
+                    return;
                 }
                 poll().then(() => {
                     setTimeout(doPoll, Math.round(Math.random() * 3000 + 1))
