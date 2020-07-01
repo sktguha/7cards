@@ -158,9 +158,9 @@
             }
             function doPoll() {
                 poll().then(() => {
-                    setTimeout(doPoll, Math.round(Math.random() * 2000 + 1))
+                    setTimeout(doPoll, Math.round(Math.random() * 3000 + 1))
                 }, () => {
-                    setTimeout(doPoll, Math.round(Math.random() * 2000 + 1))
+                    setTimeout(doPoll, Math.round(Math.random() * 3000 + 1))
                 })
             }
             doPoll();
