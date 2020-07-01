@@ -45,16 +45,19 @@
     <script>
         const get = async (api, options = {}) => {
             options.name = localStorage["name"];
+            console.log('get call', api, options);
             return fetch(api + '?' + Object.entries(options).map(arr => arr[0] + '=' + arr[1]).join('&')).then(response => {
                 if (!response.ok) {
                     console.error('error occurred', response);
                     throw new Error(response.status);
                 }
+                console.log('received data ', response, api, options);
                 return response.json();
             });
         };
         const api = { get };
         const cachedImages = {};
+        let cards = [];
         function startNewGame() {
             if (!window.confirm('are you sure you want to start a new game')) return;
             api.get('/api/start-new-game', { noOfCards: window.prompt('enter no of cards each player starts with', 7) });
@@ -84,6 +87,13 @@
                 let bt = document.createElement('button');
                 bt.innerText = "place";
                 bt.style = "display: block; margin: 3px; margin-left: 64px;";
+                bt.onclick = () => {
+                    const cardNoToPlace = i;
+                    api.get('/api/play-turn', {
+                        actionType: 1,
+                        cardNoToPlace
+                    })
+                }
                 dv.appendChild(bt);
                 cc.appendChild(dv)
             });
@@ -98,10 +108,12 @@
         }
         function init() {
             // renderCards(sortCards(_.sample(getInitialDeck(), 13)))
-            setupName();
-            setInterval(() => {
-                api.get('api/refresh-data').then(({ topCard, cards, currIndex, currPlayerName, currPlayers }) => {
-                    topCard = '2_of_hearts';
+            let lock = false;
+            function poll() {
+                lock = true;
+                return api.get('api/refresh-data').then(({ topCard, cards: cardsData, currIndex, currPlayerName, currPlayers }) => {
+                    lock = false;
+                    cards = cardsData;
                     $('#top-card')[0].innerHTML = "";
                     topCard && $('#top-card')[0].appendChild(getImage(topCard));
                     renderCards(cards);
@@ -119,9 +131,13 @@
                             elem.disabled = true;
                         });
                     }
-                })
-            }, 500);
+                }).catch((err) => { console.log('err in polling', err); lock = false; });
+            }
+            setInterval(() => {
+                if (lock) return;
+                poll();
+            }, 2000)
         }
-        init();
+        setupName().then(init);
     </script>
 </body>

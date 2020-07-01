@@ -37,7 +37,7 @@ let topCard = null;
 app.get("/", (req, res) => { res.redirect('/index.html') });
 app.use(express.static('public'))
 function log() {
-    console.log.apply(console, arguments);
+    console.log.apply(console, [Date.now(), ...arguments]);
     line = Date.now() + " : " + [...arguments].map(JSON.stringify).join(",")
     logs.push(line);
 }
@@ -106,7 +106,7 @@ app.get("/api/play-turn", (req, res) => {
     }
     actionType = actionType * 1;
     if (actionType === 1) {
-        underDeck.push(topCard);
+        topCard && underDeck.push(topCard);
         const cardToPlace = cards[name][cardNoToPlace];
         log(name, 'played turn ', actionType, ' card = ', cardToPlace);
         removeCardFromPlayerHand(name, cardToPlace);
@@ -120,7 +120,8 @@ app.get("/api/play-turn", (req, res) => {
         log(name, ' pulled 2 cards ');
     }
     incrementIndex();
-    log('turn transferrd to next player', currPlayers[currIndex], currIndex, currPlayers);
+    log('turn transferred to next player', currPlayers[currIndex], currIndex, currPlayers);
+    res.send({});
 })
 
 function addToPlayers(name) {
@@ -139,7 +140,7 @@ app.get("/api/refresh-data", (req, res) => {
     const obj = {
         topCard, cards: cards[name] || [], currIndex, currPlayerName: currPlayers[currIndex], currPlayers: currPlayers.map(player => player + ' (' + cards[name].length + ' cards )')
     }
-    if (Date.now() - (lastLog[name] || 0) > 5000) {
+    if (Date.now() - (lastLog[name] || 0) > 15000) {
         log('sent obj to client', name, obj);
         lastLog[name] = Date.now();
     }
