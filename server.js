@@ -115,12 +115,12 @@ app.get("/api/play-turn", (req, res) => {
     if (actionType === 1) {
         topCard && underDeck.push(topCard);
         const cardToPlace = cards[name][cardNoToPlace];
+        const cardToGive = cards[name][cardNoToGive];
         log(name, 'played turn ', actionType, ' card = ', cardToPlace);
         removeCardFromPlayerHand(name, cardToPlace);
         topCard = cardToPlace;
         const nextPlayer = currPlayers[currIndex === currPlayers.length - 1 ? 0 : currIndex + 1];
         if (order === 1) {
-            const cardToGive = cards[name][cardNoToGive];
             removeCardFromPlayerHand(name, cardToGive);
             addCardToPlayerHand(nextPlayer, cardToGive);
             log(nextPlayer, ' gave ', cardToGive, ' to ', name, ' by order');
