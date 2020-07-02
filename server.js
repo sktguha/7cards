@@ -113,6 +113,7 @@ app.get("/api/play-turn", (req, res) => {
     cardNoToPlace = cardNoToPlace * 1;
     if (name !== currPlayers[currIndex]) {
         log('play by ', name, ' ignored as not curr player', currPlayers[currIndex], req.query);
+        res.end();
         return;
     }
     actionType = actionType * 1;
