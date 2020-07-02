@@ -120,6 +120,11 @@ app.get("/api/play-turn", (req, res) => {
     if (actionType === 1) {
         topCard && underDeck.push(topCard);
         const cardToPlace = cards[name][cardNoToPlace];
+        if (!cardToPlace) {
+            log('ignoring invalid card to place ', cardToPlace, req.query);
+            res.end();
+            return;
+        }
         const cardToGive = cards[name][cardNoToGive];
         log(name, 'played turn ', actionType, ' card = ', cardToPlace);
         removeCardFromPlayerHand(name, cardToPlace);
