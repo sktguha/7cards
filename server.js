@@ -151,7 +151,7 @@ app.get("/api/play-turn", (req, res) => {
 
 function emitRefreshData() {
     const obj = {
-        topCard, cards, currIndex, currPlayerName: currPlayers[currIndex], currPlayers: currPlayers.map(player => player + ' (' + cards[player].length + ' cards )')
+        topCard, cards, currIndex, currPlayerName: currPlayers[currIndex], currPlayers: currPlayers.map(player => player + ' (' + (cards[player] || []).length + ' cards )')
     }
     console.log('emitting', obj);
     io.emit('message', obj);
