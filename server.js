@@ -23,7 +23,7 @@ function getInitialDeck() {
 }
 
 function shuffle(array) {
-    return array.sort(() => Math.random() - 0.5);
+    return [...array.sort(() => Math.random() - 0.5)];
 }
 
 let deck = [];
@@ -49,6 +49,7 @@ function log() {
 // log = () => { }
 function takeCardFromDeck() {
     if (deck.length === 0) {
+        log('deck empty. loading from underdeck');
         deck = shuffle(underDeck);
         underDeck = [];
     }
@@ -56,8 +57,12 @@ function takeCardFromDeck() {
 }
 function addCardToPlayerHand(name, card) {
     cards[name] = cards[name] || [];
+    if (!card) {
+        log('not adding undefined to player hand', name, card, cards);
+        return;
+    }
     if (cards[name].indexOf(card) !== -1) {
-        console.error('addCardToPlayerHand: card exists already');
+        log('addCardToPlayerHand: card exists already');
     } else {
         cards[name].push(card);
     }
@@ -67,7 +72,7 @@ function removeCardFromPlayerHand(name, card) {
     cards[name] = cards[name] || [];
     const idx = cards[name].indexOf(card);
     if (idx === -1) {
-        console.error('removeCardFromPlayerHand: card to remove doesn\'t exists already');
+        log('removeCardFromPlayerHand: card to remove doesn\'t exists already');
     } else {
         cards[name].splice(idx, 1);
     }
@@ -86,13 +91,30 @@ app.get("/api/start-new-game", (req, res) => {
             addCardToPlayerHand(player, takeCardFromDeck());
         }
     })
-    console.log({ cards });
+    log('new game:', { cards });
     turnHistory = [];
     topCard = null;
     log('started new game by', req.query.name);
     emitRefreshData()
     res.json({});
 });
+
+app.get("/api/reset-server-state", (req, res) => {
+    deck = [];
+    underDeck = [];
+    players = [];
+    currIndex = 0;
+    currPlayers = [];
+    cards = {};
+    logs = [];
+    turnHistory = [];
+    topCard = null;
+    res.json({});
+});
+
+app.get("/api/get-debug-info", (req, res) => {
+    res.json({ deck, underDeck, players, currIndex, currPlayers, logs, cards, turnHistory, topCard });
+})
 
 function pullCard(name) {
     card = takeCardFromDeck();
@@ -102,6 +124,7 @@ function incrementIndex() {
     currIndex = currIndex === currPlayers.length - 1 ? 0 : currIndex + 1;
 }
 app.get("/api/play-turn", (req, res) => {
+    log('play turn: ', req.query);
     let { name, actionType, cardNoToPlace, order, cardNoToGive } = req.query;
     actionType = actionType * 1;
     cardNoToGive = cardNoToGive * 1;
@@ -113,17 +136,22 @@ app.get("/api/play-turn", (req, res) => {
     }
     actionType = actionType * 1;
     if (actionType === 1) {
-        topCard && underDeck.push(topCard);
         const cardToPlace = cards[name][cardNoToPlace];
+        if (!cardToPlace) {
+            log('invalid card to place', cardToPlace, cardNoToPlace, req.query);
+            return;
+        }
+        topCard && underDeck.push(topCard);
+        const cardToGive = cards[name][cardNoToGive];
         log(name, 'played turn ', actionType, ' card = ', cardToPlace);
         removeCardFromPlayerHand(name, cardToPlace);
         topCard = cardToPlace;
         const nextPlayer = currPlayers[currIndex === currPlayers.length - 1 ? 0 : currIndex + 1];
         if (order === 1) {
-            const cardToGive = cards[name][cardNoToGive];
+
             removeCardFromPlayerHand(name, cardToGive);
             addCardToPlayerHand(nextPlayer, cardToGive);
-            log(nextPlayer, ' gave ', cardToGive, ' to ', name, ' by order');
+            log(name, ' gave ', cardToGive, ' to ', nextPlayer, ' by order');
         } else if (order === 2) {
             log(nextPlayer, ' ordered to pull two cards by', name);
             pullCard(nextPlayer);
@@ -142,32 +170,35 @@ app.get("/api/play-turn", (req, res) => {
     }
     log('turn transferred to next player', currPlayers[currIndex], currIndex, currPlayers);
     emitRefreshData();
-    res.send({});
+    res.end();
 })
 
 function emitRefreshData() {
     const obj = {
-        topCard, cards, currIndex, currPlayerName: currPlayers[currIndex], currPlayers: currPlayers.map(player => player + ' (' + cards[player].length + ' cards )')
+        topCard, cards, currIndex, currPlayerName: currPlayers[currIndex], currPlayers: currPlayers.map(player => player + ' (' + (cards[player] || []).length + ' cards )')
     }
-    console.log('emitting', obj);
+    log('emitting', obj);
     io.emit('message', obj);
 }
 
 function addToPlayers(name) {
-    if (players.indexOf(name) === -1) { players.push(name); console.log('added to players', name) }
+    if (players.indexOf(name) === -1) { players.push(name); log('added to players', name) }
 }
 app.get("/api/set-name", (req, res) => {
     const { name } = req.query;
     addToPlayers(name);
     log('setname call of ', name);
-    res.send({})
+    res.json({})
 })
 let lastLog = {}
 app.get("/api/refresh-data", (req, res) => {
     const { name } = req.query;
     addToPlayers(name);
     emitRefreshData();
-    res.send({});
+    const obj = {
+        topCard, cards, currIndex, currPlayerName: currPlayers[currIndex], currPlayers: currPlayers.map(player => player + ' (' + (cards[player] || []).length + ' cards )')
+    }
+    res.json(obj);
 });
 console.log('came here');
 io.on('connection', () => {

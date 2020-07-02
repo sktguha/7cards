@@ -26,6 +26,13 @@
     <div style=" margin-left: 120px;">
         <div>
             <button onclick="startNewGame()">start new game</button>
+            <button
+                onclick="window.confirm('Are you sure you want to reset server. ongoing game will reset and new game will be needed to start again') && api.get('api/reset-server-state') && getDebugInfo()">reset
+                server</button>
+            <button onclick="getDebugInfo()">get debug info</button>
+            <button
+                onclick="const nm=window.prompt('enter your name', localStorage['name']); if(!nm) return; localStorage['name'] = nm; location.reload()">Change/view
+                Name</button>
         </div>
         <span>Players List:</span>
         <div id="curr-players" style="display:inline-block;"></div>
@@ -68,6 +75,9 @@
         const cachedImages = {};
         let cards = [];
         let playTurnLock = false;
+        function getDebugInfo() {
+            api.get('api/get-debug-info').then(response => { console.log("debug info ", response); alert(JSON.stringify(response)) })
+        }
         function startNewGame() {
             if (!window.confirm('are you sure you want to start a new game')) return;
             api.get('/api/start-new-game', { noOfCards: window.prompt('enter no of cards each player starts with', 7) });
@@ -88,11 +98,13 @@
                     order = order * 1;
                     if (order === 1) {
                         while (1) {
-                            cardNoToGive = window.prompt('which card you want to give') * 1;
+                            cardNoToGive = window.prompt('which card you want to give\n' + cards.map((card, i) => (i + 1) + ' . ' + card).join('\n')) * 1;
                             cardNoToGive--;
                             if (cardNoToGive == cardNoToPlace) {
                                 alert('you can\'t give the J card to next player. choose another card');
-                            } else break;
+                            } else if (!(cardNoToGive > 0 || cardNoToGive <= cards.length - 1)) {
+                                alert(cardNoToGive + ' not in range of 1 to ' + (cards.length + 1) + ' please try again')
+                            } else { break; }
                         }
                     }
                 }
@@ -107,17 +119,14 @@
                 }, (err) => {
                     playTurnLock = false;
                 })
-            }, 500);
+                location.reload();
+            }, 1000);
             cachedImages[card] = img;
             return cachedImages[card];
         }
         function renderCards(cards) {
             $('#noc').text(cards.length);
             const cc = $('#cards-container')[0];
-            if (cc.children.length === cards.length) {
-                console.log('skip render as count same');
-                return;
-            }
             console.log('rendering again as count diff');
             cc.innerHTML = "";
             cards.forEach((card, i) => {
