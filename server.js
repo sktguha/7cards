@@ -146,7 +146,7 @@ app.get("/api/play-turn", (req, res) => {
     }
     log('turn transferred to next player', currPlayers[currIndex], currIndex, currPlayers);
     emitRefreshData();
-    res.send({});
+    res.end({});
 })
 
 function emitRefreshData() {
