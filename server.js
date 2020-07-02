@@ -56,6 +56,10 @@ function takeCardFromDeck() {
 }
 function addCardToPlayerHand(name, card) {
     cards[name] = cards[name] || [];
+    if (!card) {
+        log('not adding undefined to player hand', name, card, cards);
+        return;
+    }
     if (cards[name].indexOf(card) !== -1) {
         console.error('addCardToPlayerHand: card exists already');
     } else {
