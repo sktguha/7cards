@@ -118,6 +118,9 @@
                     playTurnLock = false;
                 })
             }, 2000);
+            setTimeout(() => {
+                api.get('/api/refresh-data');
+            }, 500)
             cachedImages[card] = img;
             return cachedImages[card];
         }
