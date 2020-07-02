@@ -173,6 +173,22 @@ app.get("/api/refresh-data", (req, res) => {
     emitRefreshData();
     res.send({});
 });
+app.get("/api/reset-server-state", (req, res) => {
+    deck = [];
+    underDeck = [];
+    players = [];
+    currIndex = 0;
+    currPlayers = [];
+    cards = {};
+    logs = [];
+    turnHistory = [];
+    topCard = null;
+    res.json({});
+});
+
+app.get("/api/get-debug-info", (req, res) => {
+    res.json({ deck, underDeck, players, currIndex, currPlayers, logs, cards, turnHistory, topCard });
+})
 console.log('came here');
 io.on('connection', () => {
     console.log('a user is connected')

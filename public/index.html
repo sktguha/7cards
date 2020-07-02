@@ -26,6 +26,13 @@
     <div style=" margin-left: 120px;">
         <div>
             <button onclick="startNewGame()">start new game</button>
+            <button
+                onclick="window.confirm('Are you sure you want to reset server. ongoing game will reset and new game will be needed to start again') && api.get('api/reset-server-state') && getDebugInfo()">reset
+                server</button>
+            <button onclick="getDebugInfo()">get debug info</button>
+            <button
+                onclick="const nm=window.prompt('enter your name', localStorage['name']); if(!nm) return; localStorage['name'] = nm; location.reload()">Change/view
+                Name</button>
         </div>
         <span>Players List:</span>
         <div id="curr-players" style="display:inline-block;"></div>
@@ -68,6 +75,9 @@
         const cachedImages = {};
         let cards = [];
         let playTurnLock = false;
+        function getDebugInfo() {
+            api.get('api/get-debug-info').then(response => { console.log("debug info ", response); alert(JSON.stringify(response)) })
+        }
         function startNewGame() {
             if (!window.confirm('are you sure you want to start a new game')) return;
             api.get('/api/start-new-game', { noOfCards: window.prompt('enter no of cards each player starts with', 7) });
